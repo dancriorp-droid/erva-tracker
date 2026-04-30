@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Erva Tracker 🌿</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>" />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet" />
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:linear-gradient(160deg,#0a0f0a 0%,#0d1a0d 25%,#0a1510 50%,#0f1a0a 75%,#0a0f0a 100%);font-family:'Outfit',sans-serif;color:#e8e6e0;min-height:100vh;overflow-x:hidden}
+
+/* Background effects */
+.bg-glow{position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 600px 400px at 20% 20%,rgba(30,100,40,.12) 0%,transparent 70%),radial-gradient(ellipse 500px 500px at 80% 60%,rgba(46,139,87,.08) 0%,transparent 70%),radial-gradient(ellipse 400px 300px at 50% 90%,rgba(20,80,30,.1) 0%,transparent 70%)}
+.bg-grid{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.03;background-image:linear-gradient(rgba(255,255,255,.1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.1) 1px,transparent 1px);background-size:60px 60px}
+
+/* Floating leaves */
+.leaf{position:fixed;pointer-events:none;z-index:0;animation:floatLeaf 14s ease-in-out infinite;font-size:24px;opacity:.08}
+.leaf:nth-child(2){top:15%;right:5%;font-size:20px;animation-duration:17s;animation-delay:2s;opacity:.06}
+.leaf:nth-child(3){top:40%;left:8%;font-size:28px;animation-duration:19s;animation-delay:4s;opacity:.07}
+.leaf:nth-child(4){top:60%;right:4%;font-size:18px;animation-duration:15s;animation-delay:1s;opacity:.05}
+.leaf:nth-child(5){top:80%;left:6%;font-size:22px;animation-duration:18s;animation-delay:3s;opacity:.09}
+.leaf:nth-child(6){top:25%;left:50%;font-size:16px;animation-duration:20s;animation-delay:5s;opacity:.04}
+@keyframes floatLeaf{0%,100%{transform:translateY(0) rotate(0deg)}25%{transform:translateY(-20px) rotate(15deg)}50%{transform:translateY(-8px) rotate(-10deg)}75%{transform:translateY(-25px) rotate(8deg)}}
+
+/* Layout */
+.container{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:20px 16px 40px}
+
+/* Header */
+.header{text-align:center;padding:30px 0 20px}
+.header-icon{font-size:40px;margin-bottom:8px}
+.header h1{font-family:'Playfair Display',serif;font-size:clamp(28px,5vw,42px);font-weight:700;letter-spacing:-.5px;background:linear-gradient(135deg,#4ade80,#22c55e,#16a34a);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header p{color:#6b7260;font-size:14px;margin-top:6px;font-weight:300;letter-spacing:2px;text-transform:uppercase}
+
+/* Nav */
+.nav{display:flex;justify-content:center;gap:8px;margin-bottom:28px}
+.nav-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#c8c4b8;padding:8px 16px;border-radius:10px;font-family:'Outfit';font-weight:500;cursor:pointer;transition:all .2s;font-size:13px;display:flex;align-items:center;gap:6px}
+.nav-btn:hover{background:rgba(255,255,255,.12);color:#fff}
+.nav-btn.active{background:rgba(46,204,113,.15);border-color:rgba(46,204,113,.4);color:#2ecc71}
+.nav-count{background:rgba(255,255,255,.08);padding:2px 8px;border-radius:10px;font-size:11px}
+.nav-btn.active .nav-count{background:rgba(46,204,113,.25)}
+
+/* Search */
+.search-wrap{position:relative;margin-bottom:16px}
+.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);opacity:.4}
+.search-wrap input{width:100%;padding:10px 14px 10px 40px}
+
+/* Inputs */
+input,textarea{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#e8e6e0;padding:10px 14px;border-radius:10px;font-size:14px;font-family:'Outfit';outline:none;width:100%;box-sizing:border-box;transition:border-color .2s}
+input:focus,textarea:focus{border-color:rgba(46,204,113,.5)}
+input::placeholder,textarea::placeholder{color:rgba(255,255,255,.25)}
+
+/* Filters */
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;align-items:center}
+.filters:last-of-type{margin-bottom:24px}
+.filter-label{font-size:11px;color:#6b7260;margin-right:4px}
+.chip{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:#a0a090;font-family:'Outfit'}
+.chip:hover{background:rgba(255,255,255,.08)}
+.chip.active{background:rgba(46,204,113,.15);border-color:rgba(46,204,113,.4);color:#2ecc71}
+
+/* Card grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+
+/* Strain card */
+.card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:18px;position:relative;overflow:hidden;cursor:pointer;transition:transform .25s,box-shadow .25s}
+.card:hover{transform:translateY(-4px) scale(1.015);box-shadow:0 12px 40px rgba(30,120,50,.2)}
+.card-glow{position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;opacity:.08;filter:blur(20px)}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.card h3{font-size:16px;font-weight:600;color:#f0efe8;margin:0}
+.card-badges{display:flex;gap:6px;margin-top:4px}
+.badge{font-size:10px;padding:2px 8px;border-radius:6px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.badge-indica{background:rgba(123,45,142,.15);color:#7B2D8E}
+.badge-sativa{background:rgba(46,204,113,.15);color:#2ECC71}
+.badge-hibrida{background:rgba(230,126,34,.15);color:#E67E22}
+.badge-format{background:rgba(255,255,255,.06);color:#8a8a7a;font-weight:500}
+.card-thc{text-align:right}
+.card-thc-val{font-size:18px;font-weight:700;color:#4ade80}
+.card-thc-label{font-size:9px;color:#6b7260;text-transform:uppercase;letter-spacing:1px}
+.card-desc{font-size:12px;color:#7a7a6a;margin:8px 0 10px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-terpenes{display:flex;gap:4px;flex-wrap:wrap}
+.card-terpenes span{font-size:10px;color:#6b7260}
+
+/* Detail view */
+.detail-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:28px 24px;position:relative;overflow:hidden}
+.detail-glow{position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;opacity:.06;filter:blur(40px)}
+.detail-header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px}
+.detail-header h2{font-family:'Playfair Display',serif;font-size:clamp(24px,4vw,32px);color:#f5f4ee}
+.detail-desc{font-size:15px;color:#b0ae9f;line-height:1.7;margin-top:20px}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:20px}
+.stat-box{background:rgba(255,255,255,.04);border-radius:12px;padding:14px;border:1px solid rgba(255,255,255,.05)}
+.stat-label{font-size:10px;color:#6b7260;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.stat-value{font-size:14px;font-weight:500;color:#d0cfc5}
+.terpene-section{margin-top:20px}
+.terpene-section h4{font-size:11px;color:#6b7260;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px}
+.terpene-list{display:flex;gap:10px;flex-wrap:wrap}
+.terpene-tag{background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.15);border-radius:12px;padding:8px 14px;display:flex;align-items:center;gap:8px}
+.terpene-tag-icon{font-size:18px}
+.terpene-tag-name{font-size:13px;font-weight:600;color:#4ade80}
+.terpene-tag-desc{font-size:10px;color:#6b7260}
+
+/* Buttons */
+.btn-back{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#c8c4b8;padding:8px 16px;border-radius:10px;font-family:'Outfit';font-weight:500;cursor:pointer;transition:all .2s;font-size:13px;margin-bottom:16px}
+.btn-back:hover{background:rgba(255,255,255,.12);color:#fff}
+.btn-primary{background:linear-gradient(135deg,#1a6b2a,#2d8a3e);border:none;color:white;padding:10px 20px;border-radius:12px;font-family:'Outfit';font-weight:600;cursor:pointer;transition:all .2s;font-size:14px}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(30,120,50,.35)}
+.btn-delete{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:#ef4444;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:12px;font-family:'Outfit'}
+
+/* Stash stats */
+.stash-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px}
+.stash-stat{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:16px;text-align:center}
+.stash-stat-icon{font-size:24px;margin-bottom:4px}
+.stash-stat-val{font-size:clamp(20px,3vw,26px);font-weight:700}
+.stash-stat-label{font-size:10px;color:#6b7260;text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+
+/* Stash item */
+.stash-item{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:16px;position:relative;overflow:hidden;margin-bottom:10px}
+.stash-item-glow{position:absolute;top:-10px;right:-10px;width:60px;height:60px;border-radius:50%;opacity:.06;filter:blur(15px)}
+.stash-item-top{display:flex;justify-content:space-between;align-items:flex-start}
+.stash-item h3{margin:0;font-size:16px;font-weight:600;display:inline}
+.stash-meta{display:flex;gap:16px;margin-top:8px;flex-wrap:wrap}
+.stash-meta span{font-size:13px;color:#a0a090}
+.stash-meta strong{color:#4ade80}
+.stash-meta .price strong{color:#fbbf24}
+.stash-stars{margin-top:6px}
+.stash-notes{font-size:12px;color:#6b7260;margin-top:6px;font-style:italic}
+
+/* Empty state */
+.empty{text-align:center;padding:60px 0}
+.empty-icon{font-size:60px;margin-bottom:16px}
+.empty h3{color:#6b7260;font-weight:400}
+.empty p{color:#4a4a40;font-size:14px}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px}
+.modal{background:linear-gradient(180deg,#1a1f1a 0%,#141814 100%);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:28px;max-width:420px;width:100%;animation:modalIn .3s ease}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.modal-header h3{font-size:18px;font-family:'Playfair Display',serif}
+.modal-header p{margin:4px 0 0;font-size:13px;color:#4ade80}
+.modal-close{background:none;border:none;color:#6b7260;font-size:22px;cursor:pointer}
+.modal-field{margin-bottom:14px}
+.modal-field label{font-size:11px;color:#6b7260;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px}
+.star-btn{background:none;border:none;font-size:28px;cursor:pointer;transition:transform .15s}
+@keyframes modalIn{from{opacity:0;transform:scale(.92) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+
+/* Toast */
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#1a6b2a,#2d8a3e);color:white;padding:12px 24px;border-radius:14px;font-size:14px;font-weight:500;box-shadow:0 8px 30px rgba(0,0,0,.4);z-index:200;animation:toastIn .3s ease;font-family:'Outfit'}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(30px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* Animations */
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .4s ease}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(46,204,113,.2);border-radius:3px}
+</style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+<div class="bg-grid"></div>
+<div class="leaf" style="top:5%;left:3%">🍃</div>
+<div class="leaf">🍃</div>
+<div class="leaf">🍃</div>
+<div class="leaf">🍃</div>
+<div class="leaf">🍃</div>
+<div class="leaf">🍃</div>
+
+<div class="container" id="app"></div>
+
+<script>
+// ══ DATABASE ══
+const STRAINS = [
+  {id:1,name:"Purple Kush",type:"Indica",format:"Flor",thc:"17-22%",cbd:"0.1%",terpenes:["Mirceno","Cariofileno"],flavor:"Uva, Terra",effects:"Relaxamento profundo, sono",color:"#7B2D8E",desc:"Clássica indica californiana, densa e roxa com aroma terroso e efeitos sedativos poderosos."},
+  {id:2,name:"Northern Lights",type:"Indica",format:"Flor",thc:"16-21%",cbd:"0.1%",terpenes:["Mirceno","Pineno"],flavor:"Pinho, Doce",effects:"Euforia, relaxamento corporal",color:"#1a5c2a",desc:"Uma das indicas mais famosas do mundo. Resina cristalina com buds compactos e aroma de pinho."},
+  {id:3,name:"Granddaddy Purple",type:"Indica",format:"Flor",thc:"17-24%",cbd:"0.1%",terpenes:["Mirceno","Pineno","Cariofileno"],flavor:"Uva, Frutas vermelhas",effects:"Relaxamento, apetite, sono",color:"#5B2C6F",desc:"Indica potente com cores vibrantes roxas e sabor frutado. Ideal para noites tranquilas."},
+  {id:4,name:"Bubba Kush",type:"Indica",format:"Flor",thc:"15-22%",cbd:"0.1%",terpenes:["Cariofileno","Limoneno"],flavor:"Chocolate, Café",effects:"Relaxamento, tranquilidade",color:"#4A3728",desc:"Sabor único de chocolate e café. Efeitos pesados no corpo, perfeita para relaxar."},
+  {id:5,name:"Sour Diesel",type:"Sativa",format:"Flor",thc:"19-25%",cbd:"0.2%",terpenes:["Cariofileno","Limoneno","Mirceno"],flavor:"Diesel, Cítrico",effects:"Energia, criatividade, foco",color:"#D4AC0D",desc:"Aroma pungente de combustível com efeitos cerebrais energizantes. Favorita de artistas e criativos."},
+  {id:6,name:"Jack Herer",type:"Sativa",format:"Flor",thc:"18-23%",cbd:"0.1%",terpenes:["Pineno","Terpinoleno"],flavor:"Pinho, Especiarias",effects:"Euforia, foco, criatividade",color:"#2ECC71",desc:"Batizada em homenagem ao ativista. Efeito lúcido e criativo com sabor complexo."},
+  {id:7,name:"Green Crack",type:"Sativa",format:"Flor",thc:"15-25%",cbd:"0.1%",terpenes:["Mirceno","Limoneno"],flavor:"Manga, Cítrico",effects:"Energia intensa, foco",color:"#27AE60",desc:"Sativa pura de energia. Sabor tropical de manga irresistível."},
+  {id:8,name:"Amnesia Haze",type:"Sativa",format:"Flor",thc:"20-25%",cbd:"0.1%",terpenes:["Limoneno","Terpinoleno"],flavor:"Limão, Terra",effects:"Euforia, energia, criatividade",color:"#F39C12",desc:"Vencedora de múltiplas Cannabis Cups. Efeito cerebral intenso com aroma cítrico."},
+  {id:9,name:"OG Kush",type:"Híbrida",format:"Flor",thc:"19-26%",cbd:"0.3%",terpenes:["Mirceno","Limoneno","Cariofileno"],flavor:"Terroso, Pinho, Limão",effects:"Euforia, relaxamento",color:"#1E8449",desc:"A lendária OG. Base genética de centenas de strains modernas. Sabor complexo e efeito equilibrado."},
+  {id:10,name:"Blue Dream",type:"Híbrida",format:"Flor",thc:"17-24%",cbd:"0.2%",terpenes:["Mirceno","Pineno","Cariofileno"],flavor:"Mirtilo, Doce",effects:"Relaxamento suave, euforia",color:"#2E86C1",desc:"A strain mais popular dos EUA. Equilíbrio perfeito entre relaxamento e estimulação."},
+  {id:11,name:"Gelato",type:"Híbrida",format:"Flor",thc:"20-25%",cbd:"0.1%",terpenes:["Limoneno","Cariofileno"],flavor:"Sobremesa, Cítrico, Menta",effects:"Euforia, relaxamento, criatividade",color:"#A569BD",desc:"Sabor de sobremesa italiana com potência séria. Tons de roxo e laranja."},
+  {id:12,name:"Wedding Cake",type:"Híbrida",format:"Flor",thc:"22-27%",cbd:"0.1%",terpenes:["Cariofileno","Limoneno","Mirceno"],flavor:"Baunilha, Doce, Terra",effects:"Relaxamento, euforia, apetite",color:"#E8DAEF",desc:"Triangle Kush x Animal Mints. Tricomas densos e sabor de baunilha."},
+  {id:13,name:"Moroccan Hash",type:"Indica",format:"Haxixe",thc:"15-30%",cbd:"0.5%",terpenes:["Mirceno","Pineno"],flavor:"Especiarias, Terra, Floral",effects:"Relaxamento profundo, meditativo",color:"#8B4513",desc:"Haxixe tradicional marroquino, prensado e curado. Textura maleável com aroma especiado."},
+  {id:14,name:"Afghan Black",type:"Indica",format:"Haxixe",thc:"20-35%",cbd:"0.3%",terpenes:["Mirceno","Cariofileno"],flavor:"Especiarias, Incenso",effects:"Sedativo, relaxamento intenso",color:"#1C1C1C",desc:"Haxixe afegão premium. Escuro, maleável e extremamente potente."},
+  {id:15,name:"Lebanese Red",type:"Híbrida",format:"Haxixe",thc:"12-25%",cbd:"1%",terpenes:["Pineno","Limoneno"],flavor:"Cedro, Especiarias, Doce",effects:"Euforia suave, relaxamento",color:"#A0522D",desc:"Haxixe libanês avermelhado, seco e quebradiço. Notas de cedro e especiarias."},
+  {id:16,name:"Charas (Temple Ball)",type:"Indica",format:"Haxixe",thc:"25-40%",cbd:"0.2%",terpenes:["Mirceno","Linalol"],flavor:"Floral, Terroso, Chocolate",effects:"Meditativo, relaxamento profundo",color:"#3D2B1F",desc:"Haxixe artesanal indiano, feito à mão por fricção. Bolas de resina pura."},
+  {id:17,name:"Bubble Hash",type:"Híbrida",format:"Haxixe",thc:"30-60%",cbd:"0.1%",terpenes:["Vários"],flavor:"Puro, Resinoso",effects:"Potente, depende da strain base",color:"#C8A951",desc:"Extraído com água gelada e telas. Pureza excepcional. Borbulha quando aquecido."},
+  {id:18,name:"Dry Sift",type:"Híbrida",format:"Haxixe",thc:"40-70%",cbd:"0.1%",terpenes:["Vários"],flavor:"Terpenos concentrados",effects:"Muito potente, depende da strain",color:"#DAA520",desc:"Peneirado a seco em múltiplas telas. Tricomas puros e dourados."},
+];
+
+const TERPENES = {
+  Mirceno:{icon:"🥭",d:"Relaxante, terroso"},Limoneno:{icon:"🍋",d:"Cítrico, humor"},Cariofileno:{icon:"🌶️",d:"Picante, anti-inflamatório"},
+  Pineno:{icon:"🌲",d:"Pinho, foco"},Linalol:{icon:"💐",d:"Floral, calmante"},Terpinoleno:{icon:"🌿",d:"Herbal, energizante"},"Vários":{icon:"✨",d:"Perfil variado"}
+};
+
+// ══ STATE ══
+let state = {
+  view: "catalog", // catalog | detail | stash
+  selected: null,
+  stash: JSON.parse(localStorage.getItem("erva-stash") || "[]"),
+  filterType: "Todos",
+  filterFormat: "Todos",
+  search: "",
+  modal: false,
+  modalStrain: null,
+  toast: null,
+};
+
+function saveStash() { localStorage.setItem("erva-stash", JSON.stringify(state.stash)); }
+
+function showToast(msg) {
+  state.toast = msg;
+  render();
+  setTimeout(() => { state.toast = null; render(); }, 2500);
+}
+
+function badgeClass(type) {
+  return type === "Indica" ? "badge-indica" : type === "Sativa" ? "badge-sativa" : "badge-hibrida";
+}
+
+// ══ RENDER ══
+function render() {
+  const app = document.getElementById("app");
+  let html = "";
+
+  // Header
+  html += `
+    <header class="header">
+      <div class="header-icon">🌿</div>
+      <h1>Erva Tracker</h1>
+      <p>Seu controle pessoal de cannabis</p>
+    </header>
+  `;
+
+  // Nav
+  html += `
+    <nav class="nav">
+      <button class="nav-btn ${state.view !== "stash" ? "active" : ""}" onclick="state.view='catalog';state.selected=null;render()">
+        🌱 Catálogo <span class="nav-count">${STRAINS.length}</span>
+      </button>
+      <button class="nav-btn ${state.view === "stash" ? "active" : ""}" onclick="state.view='stash';state.selected=null;render()">
+        📦 Meu Stash <span class="nav-count">${state.stash.length}</span>
+      </button>
+    </nav>
+  `;
+
+  // ── CATALOG ──
+  if (state.view === "catalog" && !state.selected) {
+    const filtered = STRAINS.filter(s => {
+      if (state.filterType !== "Todos" && s.type !== state.filterType) return false;
+      if (state.filterFormat !== "Todos" && s.format !== state.filterFormat) return false;
+      if (state.search && !s.name.toLowerCase().includes(state.search.toLowerCase())) return false;
+      return true;
+    });
+
+    html += `
+      <div class="fade-in">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input placeholder="Buscar strain..." value="${state.search}" oninput="state.search=this.value;render()" />
+        </div>
+        <div class="filters">
+          <span class="filter-label">TIPO:</span>
+          ${["Todos","Indica","Sativa","Híbrida"].map(t => `<button class="chip ${state.filterType===t?"active":""}" onclick="state.filterType='${t}';render()">${t==="Indica"?"🟣 ":""}${t==="Sativa"?"🟢 ":""}${t==="Híbrida"?"🟠 ":""}${t}</button>`).join("")}
+        </div>
+        <div class="filters">
+          <span class="filter-label">FORMATO:</span>
+          ${["Todos","Flor","Haxixe"].map(f => `<button class="chip ${state.filterFormat===f?"active":""}" onclick="state.filterFormat='${f}';render()">${f==="Flor"?"🌸 ":""}${f==="Haxixe"?"🟤 ":""}${f}</button>`).join("")}
+        </div>
+        <div class="grid">
+          ${filtered.map(s => `
+            <div class="card" onclick="state.selected=${s.id};state.view='detail';render()">
+              <div class="card-glow" style="background:${s.color}"></div>
+              <div class="card-top">
+                <div>
+                  <h3>${s.name}</h3>
+                  <div class="card-badges">
+                    <span class="badge ${badgeClass(s.type)}">${s.type}</span>
+                    <span class="badge badge-format">${s.format}</span>
+                  </div>
+                </div>
+                <div class="card-thc">
+                  <div class="card-thc-val">${s.thc}</div>
+                  <div class="card-thc-label">THC</div>
+                </div>
+              </div>
+              <p class="card-desc">${s.desc}</p>
+              <div class="card-terpenes">
+                ${s.terpenes.slice(0,3).map(t => `<span>${TERPENES[t]?.icon||""} ${t}</span>`).join("")}
+              </div>
+            </div>
+          `).join("")}
+        </div>
+        ${filtered.length === 0 ? '<div class="empty"><div class="empty-icon">🔍</div><p>Nenhuma strain encontrada</p></div>' : ""}
+      </div>
+    `;
+  }
+
+  // ── DETAIL ──
+  if (state.view === "detail" && state.selected) {
+    const s = STRAINS.find(x => x.id === state.selected);
+    html += `
+      <div class="fade-in">
+        <button class="btn-back" onclick="state.view='catalog';state.selected=null;render()">← Voltar ao catálogo</button>
+        <div class="detail-card">
+          <div class="detail-glow" style="background:${s.color}"></div>
+          <div class="detail-header">
+            <div>
+              <h2>${s.name}</h2>
+              <div class="card-badges" style="margin-top:8px">
+                <span class="badge ${badgeClass(s.type)}" style="padding:4px 12px;font-size:12px">${s.type}</span>
+                <span class="badge badge-format" style="padding:4px 12px;font-size:12px">${s.format}</span>
+              </div>
+            </div>
+            <button class="btn-primary" onclick="state.modal=true;state.modalStrain=${s.id};render()">+ Adicionar ao Stash</button>
+          </div>
+          <p class="detail-desc">${s.desc}</p>
+          <div class="stats-grid">
+            ${[{l:"THC",v:s.thc,i:"⚡"},{l:"CBD",v:s.cbd,i:"💚"},{l:"Sabor",v:s.flavor,i:"👅"},{l:"Efeitos",v:s.effects,i:"🧠"}].map(x => `
+              <div class="stat-box"><div class="stat-label">${x.i} ${x.l}</div><div class="stat-value">${x.v}</div></div>
+            `).join("")}
+          </div>
+          <div class="terpene-section">
+            <h4>Perfil de Terpenos</h4>
+            <div class="terpene-list">
+              ${s.terpenes.map(t => `
+                <div class="terpene-tag">
+                  <span class="terpene-tag-icon">${TERPENES[t]?.icon||""}</span>
+                  <div><div class="terpene-tag-name">${t}</div><div class="terpene-tag-desc">${TERPENES[t]?.d||""}</div></div>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ── STASH ──
+  if (state.view === "stash") {
+    const totalG = state.stash.reduce((a,b) => a + b.grams, 0);
+    const totalP = state.stash.reduce((a,b) => a + b.price, 0);
+    const unique = new Set(state.stash.map(s => s.strainId)).size;
+
+    html += `
+      <div class="fade-in">
+        <div class="stash-stats">
+          <div class="stash-stat"><div class="stash-stat-icon">⚖️</div><div class="stash-stat-val" style="color:#4ade80">${totalG.toFixed(1)}g</div><div class="stash-stat-label">Total no Stash</div></div>
+          <div class="stash-stat"><div class="stash-stat-icon">💰</div><div class="stash-stat-val" style="color:#fbbf24">R$ ${totalP.toFixed(2)}</div><div class="stash-stat-label">Total Investido</div></div>
+          <div class="stash-stat"><div class="stash-stat-icon">🌿</div><div class="stash-stat-val" style="color:#a78bfa">${unique}</div><div class="stash-stat-label">Strains Diferentes</div></div>
+        </div>
+    `;
+
+    if (state.stash.length === 0) {
+      html += `
+        <div class="empty">
+          <div class="empty-icon">📦</div>
+          <h3>Seu stash está vazio</h3>
+          <p>Vá ao Catálogo e adicione suas primeiras strains!</p>
+          <button class="btn-primary" style="margin-top:16px" onclick="state.view='catalog';render()">🌱 Explorar Catálogo</button>
+        </div>
+      `;
+    } else {
+      state.stash.forEach((item, i) => {
+        const s = STRAINS.find(x => x.id === item.strainId) || {};
+        html += `
+          <div class="stash-item">
+            <div class="stash-item-glow" style="background:${s.color||'#333'}"></div>
+            <div class="stash-item-top">
+              <div style="flex:1">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                  <h3>${s.name||"?"}</h3>
+                  <span class="badge ${badgeClass(s.type||"")}" style="font-size:9px;padding:2px 6px">${s.type||""}</span>
+                  <span class="badge badge-format" style="font-size:9px;padding:2px 6px">${s.format||""}</span>
+                </div>
+                <div class="stash-meta">
+                  <span>⚖️ <strong>${item.grams}g</strong></span>
+                  <span class="price">💰 <strong>R$ ${item.price.toFixed(2)}</strong></span>
+                  <span>📊 R$ ${(item.price/item.grams).toFixed(2)}/g</span>
+                  <span>📅 ${item.date}</span>
+                </div>
+                <div class="stash-stars">${"★".repeat(item.rating)}${"★".repeat(5-item.rating).split("").map(()=>'<span style="color:#333">★</span>').join("")}</div>
+                ${item.notes ? `<p class="stash-notes">"${item.notes}"</p>` : ""}
+              </div>
+              <button class="btn-delete" onclick="state.stash.splice(${i},1);saveStash();showToast('Item removido 🗑️')">🗑️</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+    html += `</div>`;
+  }
+
+  // ── MODAL ──
+  if (state.modal && state.modalStrain) {
+    const s = STRAINS.find(x => x.id === state.modalStrain);
+    html += `
+      <div class="modal-overlay" onclick="state.modal=false;render()">
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-header">
+            <div><h3>Adicionar ao Stash</h3><p>${s.name}</p></div>
+            <button class="modal-close" onclick="state.modal=false;render()">✕</button>
+          </div>
+          <div class="modal-field">
+            <label>Quantidade (gramas)</label>
+            <input type="number" id="m-grams" placeholder="Ex: 5" />
+          </div>
+          <div class="modal-field">
+            <label>Preço (R$)</label>
+            <input type="number" id="m-price" placeholder="Ex: 150.00" />
+          </div>
+          <div class="modal-field">
+            <label>Avaliação</label>
+            <div id="m-stars">
+              ${[1,2,3,4,5].map(r => `<button class="star-btn" onclick="document.getElementById('m-rating').value=${r};document.querySelectorAll('.star-btn').forEach((b,i)=>b.style.color=i<${r}?'#fbbf24':'#333')" style="color:${r<=4?'#fbbf24':'#333'}"">★</button>`).join("")}
+            </div>
+            <input type="hidden" id="m-rating" value="4" />
+          </div>
+          <div class="modal-field">
+            <label>Notas pessoais</label>
+            <textarea id="m-notes" rows="3" placeholder="Como foi a experiência?"></textarea>
+          </div>
+          <button class="btn-primary" style="width:100%;padding:14px;font-size:15px" onclick="addToStash(${s.id})">🌿 Salvar no Stash</button>
+        </div>
+      </div>
+    `;
+  }
+
+  // ── TOAST ──
+  if (state.toast) {
+    html += `<div class="toast">${state.toast}</div>`;
+  }
+
+  app.innerHTML = html;
+}
+
+function addToStash(strainId) {
+  const g = parseFloat(document.getElementById("m-grams").value);
+  const p = parseFloat(document.getElementById("m-price").value);
+  const r = parseInt(document.getElementById("m-rating").value) || 4;
+  const n = document.getElementById("m-notes").value;
+  if (!g || !p) return;
+  state.stash.unshift({
+    id: Date.now(),
+    strainId,
+    grams: g,
+    price: p,
+    rating: r,
+    notes: n,
+    date: new Date().toLocaleDateString("pt-BR"),
+  });
+  saveStash();
+  state.modal = false;
+  const s = STRAINS.find(x => x.id === strainId);
+  showToast(`${s.name} adicionado ao stash! 🌿`);
+}
+
+// Initial render
+render();
+</script>
+</body>
+</html>
